@@ -16,17 +16,21 @@ typedef struct
 {
     unsigned long long int range_start;
     unsigned long long int range_end;
-    unsigned long long int partial_sum;
+    long double partial_sum;
 } PartialSumData;
 
+/**
+ * Function Definitions
+ */
 void *calc_sum(void *vargs);
 
 int main(int argc, char const *argv[])
 {
 
-    unsigned long long int n, sum = 0;
+    unsigned long long int n;
+    long double sum = 0.0;
     int num_threads;
-    clock_t start, end;
+    time_t start, end;
 
     printf("Enter N: ");
     scanf("%lld", &n);
@@ -38,12 +42,12 @@ int main(int argc, char const *argv[])
     pthread_t thread_ids[num_threads];
     PartialSumData thread_data[num_threads];
 
-    start = clock(); // Start Timer
+    start = time(NULL); // Start Timer
     for (int i = 0; i < num_threads; i++)
     {
         thread_data[i].range_start = i * range;     // thread 1 range start 0, thread 2 start (n/num_threads), etc
         thread_data[i].range_end = (i + 1) * range; // thread 1 range end (n/num_threads) [not inclusive], thread 2 range end 2*(n/num_threads) [not inclusive],etc
-        thread_data[i].partial_sum = 0;             // individual threads start their sum at 0
+        thread_data[i].partial_sum = 0.0;           // individual threads start their sum at 0
 
         pthread_create(&thread_ids[i], NULL, calc_sum, (void *)&thread_data[i]); // Create threads for number of threads and passes respective thread_data object to thread
     }
@@ -52,10 +56,10 @@ int main(int argc, char const *argv[])
         pthread_join(thread_ids[i], NULL);
         sum += thread_data[i].partial_sum;
     }
-    end = clock(); // End Timer
+    end = time(NULL); // End Timer
 
-    double elapsed_time_ms = ((double)(end - start)) * 1000.0 / CLOCKS_PER_SEC;
-    printf("Sum: %lld, Ellapsed Time: %f ms\n", sum, elapsed_time_ms);
+    double elapsed_time_s = difftime(end, start); // Time difference in seconds
+    printf("Sum: %Lf, Ellapsed Time: %f seconds\n", sum, elapsed_time_s);
 
     return 0;
 }
@@ -67,6 +71,5 @@ void *calc_sum(void *thread_data)
     {
         data->partial_sum += i;
     }
-    printf("Partial Sum: %lld\n", data->partial_sum);
     pthread_exit(NULL);
 }
