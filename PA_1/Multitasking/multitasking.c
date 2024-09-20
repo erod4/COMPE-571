@@ -1,41 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-/**
- * Structure to hold thread partial sum data
- */
-typedef struct
-{
-    unsigned long long int range_start;
-    unsigned long long int range_end;
-    long double partial_sum;
-} PartialSumData;
-
+#include <math.h>
 int main(int argc, char const *argv[])
 {
     unsigned long int n;
-    unsigned int tasks_size;
-    pid_t pids;
+    int tasks_size;
+    long double sum = 0.0;
+    int fd[2];
 
     printf("Enter N: ");
     scanf("%ld", &n);
     printf("Enter task size: ");
     scanf("%d", &tasks_size);
 
-    PartialSumData task_data[tasks_size];
     unsigned long int range = n / tasks_size;
+    pid_t pids[tasks_size];
+
+    pipe(fd);
+
     for (int i = 0; i < tasks_size; i++)
     {
-        task_data[i].range_start = i * range;
-        task_data[i].range_end = i + 1 * range;
-        task_data[i].partial_sum = 0;
-        pids = fork();
+        pids[i] = fork();
 
-        if (pids == 0)
+        if (pids[i] == 0)
         {
+            long int start = i * range;
+            long int end = (i + 1) * range;
+            long double partial_sum = 0.0;
+
+            for (unsigned long int j = start; j < end; j++)
+            {
+                partial_sum += j;
+            }
+            printf("Start %ld\n", start);
+            printf("End %ld\n", end);
+            printf("Child Partial Sum: %Lf\n", partial_sum);
+            close(fd[0]);
+            write(fd[1], &partial_sum, sizeof(partial_sum));
+            exit(0);
         }
+        }
+
+    for (int i = 0; i < tasks_size; i++)
+    {
+        waitpid(pids[i], NULL, 0);
+    }
+    for (int i = 0; i < tasks_size; i++)
+    {
+        long double partial_sum = 0.0;
+        close(fd[1]);
+        read(fd[0], &partial_sum, sizeof(partial_sum));
+        printf("Partial Sum Sent To Parent: %Lf\n", partial_sum);
+        sum += partial_sum;
     }
 
-    // You can then determine uniquely identify the all available processes as a combination of pids array
+    printf("Sum %Lf\n", sum);
 }
