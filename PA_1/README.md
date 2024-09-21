@@ -1,6 +1,6 @@
 # Baseline
 
-## 1. cd ./Baseline
+## 1. cd Baseline
 
 ## 2. chmod +x run_baseline.sh
 
@@ -8,7 +8,7 @@
 
 # Multitasking
 
-## 1. cd ./Multitasking
+## 1. cd Multitasking
 
 ## 2. chmod +x run_multitasking.sh
 
@@ -16,7 +16,7 @@
 
 # Multithreading
 
-## 1. cd ./Multithreading
+## 1. cd Multithreading
 
 ## 2. chmod +x run_multithreading.sh
 
