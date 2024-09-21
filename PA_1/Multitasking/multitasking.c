@@ -12,9 +12,9 @@ int main(int argc, char const *argv[])
     time_t start, end;
 
     // get input from user
-    printf("Enter N: ");
+    printf("Enter N: \n");
     scanf("%ld", &n);
-    printf("Enter task size: ");
+    printf("Enter task size: \n");
     scanf("%d", &tasks_size);
 
     // calculate range size for each task
@@ -27,7 +27,6 @@ int main(int argc, char const *argv[])
     start = time(NULL); // Start Timer
     for (int i = 0; i < tasks_size; i++)
     {
-
         pids[i] = fork(); //> create a fork for m task size
 
         if (pids[i] == 0) //> check if its a child task
