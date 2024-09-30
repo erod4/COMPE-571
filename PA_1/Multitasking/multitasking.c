@@ -9,7 +9,7 @@ int main(int argc, char const *argv[])
     int tasks_size;
     long double sum = 0.0;
     int fd[2];
-    time_t start, end;
+    time_t start_t, end_t;
 
     // get input from user
     printf("Enter N: \n");
@@ -20,11 +20,10 @@ int main(int argc, char const *argv[])
     // calculate range size for each task
     unsigned long int range = n / tasks_size;
     pid_t pids[tasks_size];
-
     // create a pipe for tasks to communicate
     pipe(fd);
 
-    start = time(NULL); // Start Timer
+    start_t = time(NULL); // Start Timer
     for (int i = 0; i < tasks_size; i++)
     {
         pids[i] = fork(); //> create a fork for m task size
@@ -62,7 +61,7 @@ int main(int argc, char const *argv[])
         sum += partial_sum;                             //> increment sum with each childs partial sum
     }
 
-    end = time(NULL);                             //> End Timer
-    double elapsed_time_s = difftime(end, start); //> Time difference in seconds
+    end_t = time(NULL);                               //> End Timer
+    double elapsed_time_s = difftime(end_t, start_t); //> Time difference in seconds
     printf("Sum: %Lf, Ellapsed Time: %f seconds\n", sum, elapsed_time_s);
 }

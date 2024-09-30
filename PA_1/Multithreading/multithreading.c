@@ -3,15 +3,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <time.h>
-/**
- * ✅ 1. Figure out how to create ranges for each thread to add up values in its range'
- * ✅ 2. share sum between parent and child threads
- * 3. figure out how many times to run
- */
 
-/**
- * Structure to hold thread partial sum data
- */
 typedef struct
 {
     unsigned long long int range_start;
@@ -19,9 +11,6 @@ typedef struct
     long double partial_sum;
 } PartialSumData;
 
-/**
- * Function Definitions
- */
 void *calc_sum(void *vargs);
 
 int main(int argc, char const *argv[])
@@ -37,9 +26,9 @@ int main(int argc, char const *argv[])
     printf("Enter number of threads: \n");
     scanf("%d", &num_threads);
 
-    long long int range = n / num_threads; //> Thread id array with index corresponding to thread
+    long long int range = n / num_threads;
 
-    pthread_t thread_ids[num_threads];
+    pthread_t thread_ids[num_threads]; //> Thread id array with index corresponding to thread
     PartialSumData thread_data[num_threads];
 
     start = time(NULL); //> Start Timer
