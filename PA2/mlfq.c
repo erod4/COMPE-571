@@ -143,6 +143,21 @@ int main(int argc, char const *argv[])
 			usleep(QUANTUM4);
 			kill(pid4, SIGSTOP);
 		}
+		// kill(pid1, SIGCONT);
+		// 	waitpid(pid1, NULL, 0);
+		// 	// get end time
+
+		// 	kill(pid2, SIGCONT);
+		// 	waitpid(pid2, NULL, 0);
+		// 	// get end time
+
+		// 	kill(pid3, SIGCONT);
+		// 	waitpid(pid3, NULL, 0);
+		// 	// get end time
+
+		// 	kill(pid4, SIGCONT);
+		// 	waitpid(pid4, NULL, 0);
+
 		waitpid(pid1, &running1, WNOHANG);
 		waitpid(pid2, &running2, WNOHANG);
 		waitpid(pid3, &running3, WNOHANG);

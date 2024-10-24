@@ -107,11 +107,27 @@ int main(int argc, char const *argv[])
 
 	/************************************************************************************************
 		- Scheduling code starts here
-		- Below is a sample schedule. (which scheduling algorithm is this?)
-		- For the assignment purposes, you have to replace this part with the other scheduling methods
-		to be implemented.
 	************************************************************************************************/
 
+	/**
+	 * Arrival Order:
+	 * P1->P2->P3->P4
+	 */
+	kill(pid1, SIGCONT);
+	waitpid(pid1, NULL, 0);
+	// get end time
+
+	kill(pid2, SIGCONT);
+	waitpid(pid2, NULL, 0);
+	// get end time
+
+	kill(pid3, SIGCONT);
+	waitpid(pid3, NULL, 0);
+	// get end time
+
+	kill(pid4, SIGCONT);
+	waitpid(pid4, NULL, 0);
+	// get end time
 	/************************************************************************************************
 		- Scheduling code ends here
 	************************************************************************************************/

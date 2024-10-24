@@ -153,12 +153,12 @@ int main(int argc, char const *argv[])
 	for (int i = 0; i < 4; i++)
 	{
 		// continue the process
-		gettimeofday(&start_time[processes[i].response_time_idx], NULL);
 		kill(processes[i].pid, SIGCONT);
 		// wait for process to terminate since SJF is not preemptive.
 		waitpid(processes[i].pid, NULL, 0);
+		// Calculate response time in milliseconds (sec+ms converted to ms)
+		gettimeofday(&start_time[processes[i].response_time_idx], NULL);
 
-		// Calculate response time in milliseconds
 		response_time[processes[i].response_time_idx] = (start_time[processes[i].response_time_idx].tv_sec - creation_time[processes[i].response_time_idx].tv_sec) * 1000.0;
 		response_time[processes[i].response_time_idx] += (start_time[processes[i].response_time_idx].tv_usec - creation_time[processes[i].response_time_idx].tv_usec) / 1000.0;
 	}
