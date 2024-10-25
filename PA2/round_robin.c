@@ -18,14 +18,17 @@
 #define WORKLOAD3 25000
 #define WORKLOAD4 10000
 
-#define QUANTUM1 1000
-#define QUANTUM2 1000
-#define QUANTUM3 1000
-#define QUANTUM4 1000
+#define QUANTUM1 1000000
+#define QUANTUM2 1000000
+#define QUANTUM3 1000000
+#define QUANTUM4 1000000
 
 /************************************************************************************************
 					DO NOT CHANGE THE FUNCTION IMPLEMENTATION
 *************************************************************************************************/
+
+struct timespec arrival_time, end_time[4];
+
 void myfunction(int param)
 {
 
@@ -116,7 +119,7 @@ int main(int argc, char const *argv[])
 	running2 = 1;
 	running3 = 1;
 	running4 = 1;
-
+	clock_gettime(CLOCK_MONOTONIC, &arrival_time);
 	while (running1 > 0 || running2 > 0 || running3 > 0 || running4 > 0)
 	{
 		if (running1 > 0)
@@ -124,28 +127,33 @@ int main(int argc, char const *argv[])
 			kill(pid1, SIGCONT);
 			usleep(QUANTUM1);
 			kill(pid1, SIGSTOP);
+			clock_gettime(CLOCK_MONOTONIC, &end_time[0]);
 		}
+
 		if (running2 > 0)
 		{
 			kill(pid2, SIGCONT);
 			usleep(QUANTUM2);
 			kill(pid2, SIGSTOP);
+			clock_gettime(CLOCK_MONOTONIC, &end_time[1]);
 		}
+
 		if (running3 > 0)
 		{
 			kill(pid3, SIGCONT);
 			usleep(QUANTUM3);
 			kill(pid3, SIGSTOP);
+			clock_gettime(CLOCK_MONOTONIC, &end_time[2]);
 		}
+
 		if (running4 > 0)
 		{
 			kill(pid4, SIGCONT);
 			usleep(QUANTUM4);
 			kill(pid4, SIGSTOP);
+			clock_gettime(CLOCK_MONOTONIC, &end_time[3]);
 		}
-
 		waitpid(pid1, &running1, WNOHANG);
-
 		waitpid(pid2, &running2, WNOHANG);
 		waitpid(pid3, &running3, WNOHANG);
 		waitpid(pid4, &running4, WNOHANG);
@@ -154,6 +162,12 @@ int main(int argc, char const *argv[])
 	/************************************************************************************************
 		- Scheduling code ends here
 	************************************************************************************************/
-
+	float response_times[4];
+	printf("Quantum Size %d\n", QUANTUM1);
+	for (int i = 0; i < 4; i++)
+	{
+		response_times[i] = (((end_time[i].tv_sec - arrival_time.tv_sec) * 1e9) + (end_time[i].tv_nsec - arrival_time.tv_nsec)) * 1e-9;
+		printf("Task %d Response Time: %.8fs\n", i + 1, response_times[i]);
+	}
 	return 0;
 }
