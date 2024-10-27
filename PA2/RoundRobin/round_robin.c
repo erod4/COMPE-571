@@ -14,20 +14,18 @@
 *************************************************************************************************/
 
 #define WORKLOAD1 100000
-#define WORKLOAD2 50000
-#define WORKLOAD3 25000
-#define WORKLOAD4 10000
+#define WORKLOAD2 100000
+#define WORKLOAD3 100000
+#define WORKLOAD4 100000
 
-#define QUANTUM1 1000000
-#define QUANTUM2 1000000
-#define QUANTUM3 1000000
-#define QUANTUM4 1000000
+#define QUANTUM1 2000
+#define QUANTUM2 2000
+#define QUANTUM3 2000
+#define QUANTUM4 2000
 
 /************************************************************************************************
 					DO NOT CHANGE THE FUNCTION IMPLEMENTATION
 *************************************************************************************************/
-
-struct timespec arrival_time, end_time[4];
 
 void myfunction(int param)
 {
@@ -53,6 +51,7 @@ void myfunction(int param)
 		i++;
 	}
 }
+
 /************************************************************************************************/
 
 int main(int argc, char const *argv[])
@@ -64,44 +63,40 @@ int main(int argc, char const *argv[])
 
 	if (pid1 == 0)
 	{
-
 		myfunction(WORKLOAD1);
-
 		exit(0);
 	}
+
 	kill(pid1, SIGSTOP);
 
 	pid2 = fork();
 
 	if (pid2 == 0)
 	{
-
 		myfunction(WORKLOAD2);
-
 		exit(0);
 	}
+
 	kill(pid2, SIGSTOP);
 
 	pid3 = fork();
 
 	if (pid3 == 0)
 	{
-
 		myfunction(WORKLOAD3);
-
 		exit(0);
 	}
+
 	kill(pid3, SIGSTOP);
 
 	pid4 = fork();
 
 	if (pid4 == 0)
 	{
-
 		myfunction(WORKLOAD4);
-
 		exit(0);
 	}
+
 	kill(pid4, SIGSTOP);
 
 	/************************************************************************************************
@@ -114,45 +109,74 @@ int main(int argc, char const *argv[])
 		- For the assignment purposes, you have to replace this part with the other scheduling methods
 		to be implemented.
 	************************************************************************************************/
-
 	running1 = 1;
 	running2 = 1;
 	running3 = 1;
 	running4 = 1;
+
+	struct timespec arrival_time, end_time[4];
+	struct timespec csEnd, csStart;
+	float totalCSTime = 0.0;
+	int firstRun = 1;
 	clock_gettime(CLOCK_MONOTONIC, &arrival_time);
+
 	while (running1 > 0 || running2 > 0 || running3 > 0 || running4 > 0)
 	{
 		if (running1 > 0)
 		{
+
 			kill(pid1, SIGCONT);
+			clock_gettime(CLOCK_MONOTONIC, &csEnd);
 			usleep(QUANTUM1);
 			kill(pid1, SIGSTOP);
 			clock_gettime(CLOCK_MONOTONIC, &end_time[0]);
+
+			if (firstRun != 1)
+			{
+				totalCSTime += (((csEnd.tv_sec - csStart.tv_sec) * 1e9) + (csEnd.tv_nsec - csStart.tv_nsec)) * 1e-9;
+			}
+
+			firstRun = 0;
+			clock_gettime(CLOCK_MONOTONIC, &csStart);
 		}
 
 		if (running2 > 0)
 		{
+
 			kill(pid2, SIGCONT);
+			clock_gettime(CLOCK_MONOTONIC, &csEnd);
 			usleep(QUANTUM2);
 			kill(pid2, SIGSTOP);
 			clock_gettime(CLOCK_MONOTONIC, &end_time[1]);
+			totalCSTime += (((csEnd.tv_sec - csStart.tv_sec) * 1e9) + (csEnd.tv_nsec - csStart.tv_nsec)) * 1e-9;
+			clock_gettime(CLOCK_MONOTONIC, &csStart);
 		}
 
 		if (running3 > 0)
 		{
+
 			kill(pid3, SIGCONT);
+			clock_gettime(CLOCK_MONOTONIC, &csEnd);
 			usleep(QUANTUM3);
 			kill(pid3, SIGSTOP);
 			clock_gettime(CLOCK_MONOTONIC, &end_time[2]);
+			totalCSTime += (((csEnd.tv_sec - csStart.tv_sec) * 1e9) + (csEnd.tv_nsec - csStart.tv_nsec)) * 1e-9;
+
+			clock_gettime(CLOCK_MONOTONIC, &csStart);
 		}
 
 		if (running4 > 0)
 		{
+
 			kill(pid4, SIGCONT);
+			clock_gettime(CLOCK_MONOTONIC, &csEnd);
 			usleep(QUANTUM4);
 			kill(pid4, SIGSTOP);
 			clock_gettime(CLOCK_MONOTONIC, &end_time[3]);
+			totalCSTime += (((csEnd.tv_sec - csStart.tv_sec) * 1e9) + (csEnd.tv_nsec - csStart.tv_nsec)) * 1e-9;
+			clock_gettime(CLOCK_MONOTONIC, &csStart);
 		}
+
 		waitpid(pid1, &running1, WNOHANG);
 		waitpid(pid2, &running2, WNOHANG);
 		waitpid(pid3, &running3, WNOHANG);
@@ -169,5 +193,8 @@ int main(int argc, char const *argv[])
 		response_times[i] = (((end_time[i].tv_sec - arrival_time.tv_sec) * 1e9) + (end_time[i].tv_nsec - arrival_time.tv_nsec)) * 1e-9;
 		printf("Task %d Response Time: %.8fs\n", i + 1, response_times[i]);
 	}
+
+	printf("Total Context Switch Time: %.8fs\n", totalCSTime);
+
 	return 0;
 }
