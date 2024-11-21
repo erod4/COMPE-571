@@ -33,31 +33,36 @@ void edf_scheduling(SystemInfo *sys_info, TaskInfo *task_info)
     At this point we can start calculating scheduling.
     */
 
-    TaskInfo valid_tasks[valid_task_count];
-    // store valid tasks in new array
-    for (int i = 0; i < WCET_LEN; i++)
+    TaskInfo valid_tasks[sys_info->num_tasks];
+    // Store all tasks in the valid_tasks array
+    for (int i = 0; i < sys_info->num_tasks; i++)
     {
-        if (is_edf_valid_for_idx[i])
-        {
-            valid_tasks[i] = task_info[i];
-        }
+        valid_tasks[i] = task_info[i];
     }
 
-    // sort tasks by deadline
-    qsort(valid_tasks, valid_task_count, sizeof(TaskInfo), compare_by_deadline_desc);
+    // Sort tasks by deadline
+    qsort(valid_tasks, sys_info->num_tasks, sizeof(TaskInfo), compare_by_deadline_desc);
 
-    for (int j = 0; j < valid_task_count; j++)
+    // Loop through each valid WCET index
+    for (int wcet_index = 0; wcet_index < WCET_LEN; wcet_index++)
     {
-        printf("\n\rEDF Execution Schedule WCET %d:\n", j + 1);
+        // Skip WCET columns that are not valid
+        if (is_edf_valid_for_idx[wcet_index] == 0)
+        {
+            continue;
+        }
+
+        printf("\nEDF Execution Schedule for WCET Index %d (Valid):\n", wcet_index + 1);
         printf("Start Time(s)\tTask\tRun Time(s)\tFrequency\tEnergy(J)\n");
 
         int current_time = 0;
-        int remaining_time[valid_task_count];
-        int absolute_deadline[valid_task_count];
-        // Initialize remaining time and absolute deadlines
-        for (int i = 0; i < valid_task_count; i++)
+        int remaining_time[sys_info->num_tasks];
+        int absolute_deadline[sys_info->num_tasks];
+
+        // Initialize remaining time and absolute deadlines for all tasks
+        for (int i = 0; i < sys_info->num_tasks; i++)
         {
-            remaining_time[i] = valid_tasks[i].wcet[j];
+            remaining_time[i] = valid_tasks[i].wcet[wcet_index];
             absolute_deadline[i] = valid_tasks[i].task_deadline;
         }
 
@@ -70,7 +75,7 @@ void edf_scheduling(SystemInfo *sys_info, TaskInfo *task_info)
             int earliest_deadline = 1000000;
 
             // Find the task with the earliest absolute deadline that still has execution time remaining
-            for (int i = 0; i < valid_task_count; i++)
+            for (int i = 0; i < sys_info->num_tasks; i++)
             {
                 if (remaining_time[i] > 0 && absolute_deadline[i] < earliest_deadline)
                 {
@@ -95,9 +100,9 @@ void edf_scheduling(SystemInfo *sys_info, TaskInfo *task_info)
                     else
                     {
                         // Print task execution
-                        int power = sys_info->active_power[j];
+                        int power = sys_info->active_power[wcet_index];
                         float energy = calculate_energy(power, run_time);
-                        printf("%d\t\t%s\t%d\t\t%dMHz\t\t%.4f\n", task_start_time, valid_tasks[last_task].task_name, run_time, f_cpus_MHz[j], energy);
+                        printf("%d\t\t%s\t%d\t\t%dMHz\t\t%.4f\n", task_start_time, valid_tasks[last_task].task_name, run_time, f_cpus_MHz[wcet_index], energy);
                     }
                     task_start_time = current_time;
                     last_task = selected_task;
@@ -112,9 +117,9 @@ void edf_scheduling(SystemInfo *sys_info, TaskInfo *task_info)
                 if (last_task != -1)
                 {
                     int run_time = current_time - task_start_time;
-                    int power = sys_info->active_power[j];
+                    int power = sys_info->active_power[wcet_index];
                     float energy = calculate_energy(power, run_time);
-                    printf("%d\t\t%s\t%d\t\t%dMHz\t\t%.4f\n", task_start_time, valid_tasks[last_task].task_name, run_time, f_cpus_MHz[j], energy);
+                    printf("%d\t\t%s\t%d\t\t%dMHz\t\t%.4f\n", task_start_time, valid_tasks[last_task].task_name, run_time, f_cpus_MHz[wcet_index], energy);
                     task_start_time = current_time;
                     last_task = -1; // Now idle
                 }
@@ -124,12 +129,12 @@ void edf_scheduling(SystemInfo *sys_info, TaskInfo *task_info)
             current_time++;
 
             // Check for period completion and reset tasks
-            for (int i = 0; i < valid_task_count; i++)
+            for (int i = 0; i < sys_info->num_tasks; i++)
             {
                 if (current_time % valid_tasks[i].task_deadline == 0)
                 {
-                    remaining_time[i] = valid_tasks[i].wcet[0];
-                    absolute_deadline[i] = current_time + valid_tasks[i].task_deadline;
+                    remaining_time[i] = valid_tasks[i].wcet[wcet_index];                // Reset WCET for this period
+                    absolute_deadline[i] = current_time + valid_tasks[i].task_deadline; // Update the absolute deadline
                 }
             }
         }
@@ -142,9 +147,9 @@ void edf_scheduling(SystemInfo *sys_info, TaskInfo *task_info)
         }
         else
         {
-            int power = sys_info->active_power[0];
+            int power = sys_info->active_power[wcet_index];
             float energy = calculate_energy(power, run_time);
-            printf("%d\t\t%s\t%d\t\t%dMHz\t\t%.4f\n", task_start_time, valid_tasks[last_task].task_name, run_time, f_cpus_MHz[j], energy);
+            printf("%d\t\t%s\t%d\t\t%dMHz\t\t%.4f\n", task_start_time, valid_tasks[last_task].task_name, run_time, f_cpus_MHz[wcet_index], energy);
         }
     }
 }
