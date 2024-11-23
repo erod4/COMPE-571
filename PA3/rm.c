@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+void ee_rm_scheduling(SystemInfo *sys_info, TaskInfo *task_info)
+{
+}
+
 void rm_scheduling(SystemInfo *sys_info, TaskInfo *task_info)
 {
     int is_rm_valid_for_idx[WCET_LEN];

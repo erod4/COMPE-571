@@ -33,11 +33,27 @@ int main(int argc, char const *argv[])
     int is_EDF_selected = strcmp(argv[2], "EDF");
     int is_RM_selected = strcmp(argv[2], "RM");
 
+    // if user didnt input EDF or RM
     if (is_EDF_selected && is_RM_selected)
     {
         printf("Please Select either EDF or RM.\n\r");
         return 1;
     }
+
+    int use_ee = 1;
+    if (argv[3] != NULL)
+    {
+        use_ee = strcmp(argv[3], "EE");
+    }
+    if (use_ee == 0)
+    {
+        printf("EE selected\n");
+    }
+    else
+    {
+        printf("EE not selected\n");
+    }
+
     //////////////////////////////////////
     //  Error Checking Ends Here!       //
     /////////////////////////////////////
@@ -59,14 +75,14 @@ int main(int argc, char const *argv[])
            &system_info.idle_power);
 
     // Output parsed data to verify correctness
-    printf("System Information:\n");
-    printf("Number of tasks: %d\n", system_info.num_tasks);
-    printf("Execution time: %d seconds\n", system_info.execution_time);
-    printf("Active CPU Power at 1188 MHz: %d\n", system_info.active_power[0]);
-    printf("Active CPU Power at 918 MHz: %d\n", system_info.active_power[1]);
-    printf("Active CPU Power at 648 MHz: %d\n", system_info.active_power[2]);
-    printf("Active CPU Power at 384 MHz: %d\n", system_info.active_power[3]);
-    printf("Idle CPU Power: %d\n\n", system_info.idle_power);
+    // printf("System Information:\n");
+    // printf("Number of tasks: %d\n", system_info.num_tasks);
+    // printf("Execution time: %d seconds\n", system_info.execution_time);
+    // printf("Active CPU Power at 1188 MHz: %d\n", system_info.active_power[0]);
+    // printf("Active CPU Power at 918 MHz: %d\n", system_info.active_power[1]);
+    // printf("Active CPU Power at 648 MHz: %d\n", system_info.active_power[2]);
+    // printf("Active CPU Power at 384 MHz: %d\n", system_info.active_power[3]);
+    // printf("Idle CPU Power: %d\n\n", system_info.idle_power);
 
     // Array of TaskInfo instances to store each tasks information
     TaskInfo task_info[system_info.num_tasks];
@@ -85,18 +101,27 @@ int main(int argc, char const *argv[])
 
     for (int i = 0; i < system_info.num_tasks; i++)
     {
-        printf("\n\nTask Name: %s\n", task_info[i].task_name);
-        printf("Task Deadline: %d\n", task_info[i].task_deadline);
-        printf("Task WCET 1: %d\n", task_info[i].wcet[0]);
-        printf("Task WCET 2: %d\n", task_info[i].wcet[1]);
-        printf("Task WCET 3: %d\n", task_info[i].wcet[2]);
-        printf("Task WCET 4: %d\n\n", task_info[i].wcet[3]);
+        // printf("\n\nTask Name: %s\n", task_info[i].task_name);
+        // printf("Task Deadline: %d\n", task_info[i].task_deadline);
+        // printf("Task WCET 1: %d\n", task_info[i].wcet[0]);
+        // printf("Task WCET 2: %d\n", task_info[i].wcet[1]);
+        // printf("Task WCET 3: %d\n", task_info[i].wcet[2]);
+        // printf("Task WCET 4: %d\n\n", task_info[i].wcet[3]);
     }
     // if rm selected execute rm
-    if (is_RM_selected == 0)
+    if (is_RM_selected == 0 && use_ee != 0)
     {
         rm_scheduling(&system_info, task_info);
     }
+    else if (is_RM_selected == 0 && use_ee == 0)
+    {
+        ee_rm_scheduling(&system_info, task_info);
+    }
+    else if (is_EDF_selected == 0 && use_ee == 0)
+    {
+        ee_edf_scheduling(&system_info, task_info);
+    }
+
     else if (is_EDF_selected == 0)
     {
         edf_scheduling(&system_info, task_info);

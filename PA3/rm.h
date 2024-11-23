@@ -3,6 +3,12 @@
 
 #include "global.h"
 #define WCET_LEN 4
+/**
+ * @brief This function will calculate if the execution times are valid for Rate Monotonic Scheduling for Energy Efficiency
+ * @param sys_info SystemInfo instance
+ * @param task_info TaskInfo instance
+ */
+void ee_rm_scheduling(SystemInfo *sys_info, TaskInfo *task_info);
 
 /**
  * @brief This function will calculate if the execution times are valid for Rate Monotonic Scheduling
