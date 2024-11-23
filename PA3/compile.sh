@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Compile the fcfs.c file
+# Compile the necessary files
 gcc main.c edf.c global.c rm.c -o main
 
 
